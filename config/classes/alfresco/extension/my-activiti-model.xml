@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model name="mwf:myworkflowmodel" xmlns="http://www.alfresco.org/model/dictionary/1.0">
+    <imports>
+        <import uri="http://www.alfresco.org/model/dictionary/1.0" prefix="d" />
+        <import uri="http://www.alfresco.org/model/system/1.0" prefix="sys" />
+        <import uri="http://www.alfresco.org/model/content/1.0" prefix="cm" />
+        <import uri="http://www.alfresco.org/model/user/1.0" prefix="usr" />
+        <import uri="http://www.alfresco.org/model/bpm/1.0" prefix="bpm" />
+        <import uri="http://www.alfresco.org/model/workflow/1.0" prefix="wf" />
+    </imports>
+    <namespaces>
+        <namespace uri="http://ecm-alfresco.ru/model/workflow/1.0" prefix="mwf" />
+    </namespaces>
+    <types>
+        <!-- Coordination -->
+        <type name="mwf:coordinationStartTask">
+            <parent>bpm:startTask</parent>
+            <overrides>
+                <property name="bpm:packageActionGroup">
+                    <default>add_package_item_actions</default>
+                </property>
+            </overrides>
+            <mandatory-aspects>
+                <aspect>bpm:assignee</aspect>
+                <aspect>mwf:lastComment</aspect>
+            </mandatory-aspects>
+        </type>
+        <type name="mwf:createContractTask">
+            <parent>bpm:workflowTask</parent>
+            <overrides>
+                <property name="bpm:packageActionGroup">
+                    <default>add_package_item_actions</default>
+                </property>
+                <property name="bpm:packageItemActionGroup">
+                    <default>edit_package_item_actions</default>
+                </property>
+            </overrides>
+            <mandatory-aspects>
+                <aspect>bpm:assignee</aspect>
+                <aspect>mwf:head</aspect>
+                <aspect>mwf:lastComment</aspect>
+            </mandatory-aspects>
+        </type>
+        <type name="mwf:coordinationTask">
+            <parent>bpm:activitiOutcomeTask</parent>
+            <properties>
+                <property name="mwf:coordOutcome">
+                    <type>d:text</type>
+                    <default>Reject</default>
+                    <constraints>
+                        <constraint name="mwf:outcomeOptions" type="LIST">
+                            <parameter name="allowedValues">
+                                <list>
+                                    <value>Approve</value>
+                                    <value>Reject</value>
+                                </list>
+                            </parameter>
+                        </constraint>
+                    </constraints>
+                </property>
+            </properties>
+            <overrides>
+                <property name="bpm:packageActionGroup">
+                    <default>edit_package_item_actions</default>
+                </property>
+                <property name="bpm:outcomePropertyName">
+                    <default>{http://ecm-alfresco.ru/model/workflow/1.0}coordOutcome</default>
+                </property>
+            </overrides>
+            <mandatory-aspects>
+                <aspect>mwf:lastComment</aspect>
+            </mandatory-aspects>
+        </type>
+        <type name="mwf:coordinationHeadTask">
+            <parent>mwf:coordinationTask</parent>
+            <overrides>
+                <property name="bpm:packageActionGroup">
+                    <default>edit_package_item_actions</default>
+                </property>
+            </overrides>
+        </type>
+        <type name="mwf:coordinationUOTask">
+            <parent>mwf:coordinationTask</parent>
+            <overrides>
+                <property name="bpm:packageActionGroup">
+                    <default>edit_package_item_actions</default>
+                </property>
+            </overrides>
+        </type>
+        <type name="mwf:coordinationFOTask">
+            <parent>mwf:coordinationTask</parent>
+            <overrides>
+                <property name="bpm:packageActionGroup">
+                    <default>edit_package_item_actions</default>
+                </property>
+            </overrides>
+        </type>
+        <type name="mwf:coordinationEndTask">
+            <parent>bpm:workflowTask</parent>
+            <overrides>
+                <property name="bpm:packageItemActionGroup">
+                    <default>edit_package_item_actions</default>
+                </property>
+            </overrides>
+            <mandatory-aspects>
+                <aspect>bpm:assignee</aspect>
+            </mandatory-aspects>
+        </type>
+    </types>
+    <aspects>
+        <aspect name="mwf:head">
+			<associations>
+				<association name="mwf:head">
+					<source>
+						<mandatory>true</mandatory>
+						<many>false</many>
+					</source>
+					<target>
+						<class>cm:person</class>
+						<mandatory>true</mandatory>
+						<many>false</many>
+					</target>
+				</association>
+			</associations>
+	    </aspect>
+        <aspect name="mwf:lastComment">
+            <properties>
+                <property name="mwf:lastCommentText">
+                    <type>d:text</type>
+                    <mandatory>false</mandatory>
+                </property>
+                <property name="mwf:lastCommentTaskType">
+                    <type>d:text</type>
+                    <mandatory>false</mandatory>
+                </property>
+                <property name="mwf:lastCommentCreator">
+                    <type>d:text</type>
+                    <mandatory>false</mandatory>
+                </property>
+            </properties>
+        </aspect>
+    </aspects>
+</model>

@@ -1,0 +1,238 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:activiti="http://activiti.org/bpmn" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC" xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI" typeLanguage="http://www.w3.org/2001/XMLSchema" expressionLanguage="http://www.w3.org/1999/XPath" targetNamespace="http://www.activiti.org/test">
+  <process id="coordination" name="coordination" isExecutable="true">
+    <extensionElements>
+      <activiti:executionListener event="start" class="org.alfresco.repo.workflow.activiti.listener.ScriptExecutionListener">
+        <activiti:field name="script">
+          <activiti:string>
+              execution.setVariable('mwf_managerschiefGroup', groups.getGroup('managers_chief').getFullName());
+            execution.setVariable('mwf_financiersGroup', groups.getGroup('financiers').getFullName());
+            execution.setVariable('mwf_lawGroup', groups.getGroup('law').getFullName());
+          </activiti:string>
+        </activiti:field>k
+      </activiti:executionListener>
+    </extensionElements>
+    <startEvent id="coordinationStartTask" name="Старт процесса согласования" activiti:formKey="mwf:coordinationStartTask">    
+    </startEvent>
+    <userTask id="createContractTask" name="Подготовка текста договора" activiti:assignee="${bpm_assignee.properties.userName}" activiti:formKey="mwf:createContractTask">
+      <extensionElements>
+        <activiti:taskListener event="create" class="org.alfresco.repo.workflow.activiti.tasklistener.ScriptTaskListener">
+          <activiti:field name="script">
+            <activiti:string>
+              if (typeof bpm_workflowDueDate != 'undefined') task.setVariable('bpm_dueDate', bpm_workflowDueDate);
+              if (typeof bpm_workflowPriority != 'undefined') task.priority = bpm_workflowPriority;
+            </activiti:string>
+          </activiti:field>
+        </activiti:taskListener>
+        <activiti:taskListener event="complete" class="org.alfresco.repo.workflow.activiti.tasklistener.ScriptTaskListener">
+          <activiti:field name="script">
+            <activiti:string>
+              var head = task.getVariable('mwf_head');
+              execution.setVariable('mwf_head', head.properties.userName);
+              execution.setVariable('mwf_lastCommentText', task.getVariable('bpm_comment'));
+              execution.setVariable('mwf_lastCommentCreator', person.properties['cm:firstName']+ ' ' +person.properties['cm:lastName']);    
+              execution.setVariable('mwf_lastCommentTaskType', 'Подготовка текста договора');                    
+            </activiti:string>          
+          </activiti:field>
+        </activiti:taskListener>        
+      </extensionElements>
+    </userTask>
+    <userTask id="coordinationHeadTask" name="Согласование Руководитель" activiti:assignee="${mwf_head}" activiti:formKey="mwf:coordinationHeadTask">
+      <extensionElements>
+        <activiti:taskListener event="create" class="org.alfresco.repo.workflow.activiti.tasklistener.ScriptTaskListener">
+          <activiti:field name="script">
+            <activiti:string>
+              if (typeof bpm_workflowDueDate != 'undefined') task.setVariable('bpm_dueDate', bpm_workflowDueDate);
+              if (typeof bpm_workflowPriority != 'undefined') task.priority = bpm_workflowPriority;
+            </activiti:string>
+          </activiti:field>
+        </activiti:taskListener>
+        <activiti:taskListener event="complete" class="org.alfresco.repo.workflow.activiti.tasklistener.ScriptTaskListener">
+          <activiti:field name="script">
+            <activiti:string>
+              execution.setVariable('mwf_coordOutcome', task.getVariable('mwf_coordOutcome'));
+              if(task.getVariable('mwf_coordOutcome')=='Reject'){
+                execution.setVariable('mwf_lastCommentText', task.getVariable('bpm_comment'));
+                execution.setVariable('mwf_lastCommentCreator', person.properties['cm:firstName']+ ' ' +person.properties['cm:lastName']);    
+                execution.setVariable('mwf_lastCommentTaskType', "Согласование Руководитель");    
+              }          
+            </activiti:string>
+          </activiti:field>
+        </activiti:taskListener>
+      </extensionElements>
+    </userTask>
+    <userTask id="coordinationUOTask" name="Согласование ЮО" activiti:candidateGroups="${mwf_lawGroup}" activiti:formKey="mwf:coordinationUOTask">
+      <extensionElements>
+        <activiti:taskListener event="create" class="org.alfresco.repo.workflow.activiti.tasklistener.ScriptTaskListener">
+          <activiti:field name="script">
+            <activiti:string>
+              if (typeof bpm_workflowDueDate != 'undefined') task.setVariable('bpm_dueDate', bpm_workflowDueDate);
+              if (typeof bpm_workflowPriority != 'undefined') task.priority = bpm_workflowPriority;
+            </activiti:string>
+          </activiti:field>
+        </activiti:taskListener>
+        <activiti:taskListener event="complete" class="org.alfresco.repo.workflow.activiti.tasklistener.ScriptTaskListener">
+          <activiti:field name="script">
+            <activiti:string>
+              execution.setVariable('mwf_coordOutcome', task.getVariable('mwf_coordOutcome'));
+              if(task.getVariable('mwf_coordOutcome')=='Reject'){
+                execution.setVariable('mwf_lastCommentText', task.getVariable('bpm_comment'));
+                execution.setVariable('mwf_lastCommentCreator', person.properties['cm:firstName']+ ' ' +person.properties['cm:lastName']);    
+                execution.setVariable('mwf_lastCommentTaskType', "Согласование ЮО");        
+              }                          
+            </activiti:string>    
+          </activiti:field>
+        </activiti:taskListener>
+      </extensionElements>
+    </userTask>
+    <userTask id="coordinationFOTask" name="Согласование ФО" activiti:candidateGroups="${mwf_financiersGroup}" activiti:formKey="mwf:coordinationFOTask">
+      <extensionElements>
+        <activiti:taskListener event="create" class="org.alfresco.repo.workflow.activiti.tasklistener.ScriptTaskListener">
+          <activiti:field name="script">
+            <activiti:string>
+              if (typeof bpm_workflowDueDate != 'undefined') task.setVariable('bpm_dueDate', bpm_workflowDueDate);
+              if (typeof bpm_workflowPriority != 'undefined') task.priority = bpm_workflowPriority;
+            </activiti:string>
+          </activiti:field>
+        </activiti:taskListener>
+        <activiti:taskListener event="complete" class="org.alfresco.repo.workflow.activiti.tasklistener.ScriptTaskListener">
+          <activiti:field name="script">
+            <activiti:string>
+               execution.setVariable('mwf_coordOutcome', task.getVariable('mwf_coordOutcome'));           
+              if(task.getVariable('mwf_coordOutcome')=='Reject'){
+                execution.setVariable('mwf_lastCommentText', task.getVariable('bpm_comment'));
+                execution.setVariable('mwf_lastCommentCreator', person.properties['cm:firstName']+ ' ' +person.properties['cm:lastName']);    
+                execution.setVariable('mwf_lastCommentTaskType', "Согласование ФО");    
+              }
+            </activiti:string>
+          </activiti:field>
+        </activiti:taskListener>
+      </extensionElements>
+    </userTask>
+    <userTask id="coordinationEndTask" name="Договор согласован" activiti:assignee="${bpm_assignee.properties.userName}" activiti:formKey="mwf:coordinationEndTask">
+      <extensionElements>
+        <activiti:taskListener event="create" class="org.alfresco.repo.workflow.activiti.tasklistener.ScriptTaskListener">
+          <activiti:field name="script">
+            <activiti:string>
+              if (typeof bpm_workflowDueDate != 'undefined') task.setVariable('bpm_dueDate', bpm_workflowDueDate);
+              if (typeof bpm_workflowPriority != 'undefined') task.priority = bpm_workflowPriority;
+            </activiti:string>
+          </activiti:field>
+        </activiti:taskListener>
+      </extensionElements>
+    </userTask>
+    <endEvent id="endevent1" name="End"></endEvent>
+    <sequenceFlow id="flow1" sourceRef="coordinationStartTask" targetRef="createContractTask"></sequenceFlow>
+    <sequenceFlow id="flow2" sourceRef="createContractTask" targetRef="coordinationHeadTask"></sequenceFlow>
+    <sequenceFlow id="flow12" sourceRef="coordinationEndTask" targetRef="endevent1"></sequenceFlow>
+    <exclusiveGateway id="exclusivegateway1" name="Exclusive Gateway"></exclusiveGateway>
+    <exclusiveGateway id="exclusivegateway2" name="Exclusive Gateway"></exclusiveGateway>
+    <exclusiveGateway id="exclusivegateway3" name="Exclusive Gateway"></exclusiveGateway>
+    <sequenceFlow id="flow13" sourceRef="coordinationHeadTask" targetRef="exclusivegateway1"></sequenceFlow>
+    <sequenceFlow id="flow14" sourceRef="exclusivegateway1" targetRef="coordinationUOTask">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${mwf_coordOutcome == 'Approve'}]]></conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="flow15" sourceRef="exclusivegateway1" targetRef="createContractTask">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${mwf_coordOutcome == 'Reject'}]]></conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="flow16" sourceRef="coordinationUOTask" targetRef="exclusivegateway3"></sequenceFlow>
+    <sequenceFlow id="flow17" sourceRef="exclusivegateway3" targetRef="coordinationFOTask">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${mwf_coordOutcome == 'Approve'}]]></conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="flow18" sourceRef="exclusivegateway3" targetRef="createContractTask">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${mwf_coordOutcome == 'Reject'}]]></conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="flow19" sourceRef="coordinationFOTask" targetRef="exclusivegateway2"></sequenceFlow>
+    <sequenceFlow id="flow20" sourceRef="exclusivegateway2" targetRef="coordinationEndTask">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${mwf_coordOutcome == 'Approve'}]]></conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="flow21" sourceRef="exclusivegateway2" targetRef="createContractTask">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${mwf_coordOutcome == 'Reject'}]]></conditionExpression>
+    </sequenceFlow>
+  </process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_coordination">
+    <bpmndi:BPMNPlane bpmnElement="coordination" id="BPMNPlane_coordination">
+      <bpmndi:BPMNShape bpmnElement="endevent1" id="BPMNShape_endevent1">
+        <omgdc:Bounds height="35.0" width="35.0" x="729.0" y="310.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="coordinationStartTask" id="BPMNShape_coordinationStartTask">
+        <omgdc:Bounds height="35.0" width="35.0" x="40.0" y="26.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="createContractTask" id="BPMNShape_createContractTask">
+        <omgdc:Bounds height="55.0" width="181.0" x="100.0" y="16.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="coordinationHeadTask" id="BPMNShape_coordinationHeadTask">
+        <omgdc:Bounds height="55.0" width="181.0" x="100.0" y="94.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="coordinationUOTask" id="BPMNShape_coordinationUOTask">
+        <omgdc:Bounds height="55.0" width="181.0" x="240.0" y="163.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="coordinationFOTask" id="BPMNShape_coordinationFOTask">
+        <omgdc:Bounds height="55.0" width="181.0" x="380.0" y="228.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="coordinationEndTask" id="BPMNShape_coordinationEndTask">
+        <omgdc:Bounds height="55.0" width="181.0" x="520.0" y="300.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="exclusivegateway1" id="BPMNShape_exclusivegateway1">
+        <omgdc:Bounds height="40.0" width="40.0" x="310.0" y="101.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="exclusivegateway2" id="BPMNShape_exclusivegateway2">
+        <omgdc:Bounds height="40.0" width="40.0" x="590.0" y="235.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="exclusivegateway3" id="BPMNShape_exclusivegateway3">
+        <omgdc:Bounds height="40.0" width="40.0" x="450.0" y="170.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge bpmnElement="flow1" id="BPMNEdge_flow1">
+        <omgdi:waypoint x="75.0" y="43.0"></omgdi:waypoint>
+        <omgdi:waypoint x="100.0" y="43.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow2" id="BPMNEdge_flow2">
+        <omgdi:waypoint x="190.0" y="71.0"></omgdi:waypoint>
+        <omgdi:waypoint x="190.0" y="94.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow12" id="BPMNEdge_flow12">
+        <omgdi:waypoint x="701.0" y="327.0"></omgdi:waypoint>
+        <omgdi:waypoint x="729.0" y="327.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow14" id="BPMNEdge_flow14">
+        <omgdi:waypoint x="330.0" y="141.0"></omgdi:waypoint>
+        <omgdi:waypoint x="330.0" y="163.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow15" id="BPMNEdge_flow15">
+        <omgdi:waypoint x="330.0" y="101.0"></omgdi:waypoint>
+        <omgdi:waypoint x="329.0" y="44.0"></omgdi:waypoint>
+        <omgdi:waypoint x="281.0" y="43.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow16" id="BPMNEdge_flow16">
+        <omgdi:waypoint x="421.0" y="190.0"></omgdi:waypoint>
+        <omgdi:waypoint x="450.0" y="190.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow17" id="BPMNEdge_flow17">
+        <omgdi:waypoint x="470.0" y="210.0"></omgdi:waypoint>
+        <omgdi:waypoint x="470.0" y="228.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow18" id="BPMNEdge_flow18">
+        <omgdi:waypoint x="470.0" y="170.0"></omgdi:waypoint>
+        <omgdi:waypoint x="469.0" y="43.0"></omgdi:waypoint>
+        <omgdi:waypoint x="281.0" y="43.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow13" id="BPMNEdge_flow13">
+        <omgdi:waypoint x="281.0" y="121.0"></omgdi:waypoint>
+        <omgdi:waypoint x="310.0" y="121.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow19" id="BPMNEdge_flow19">
+        <omgdi:waypoint x="561.0" y="255.0"></omgdi:waypoint>
+        <omgdi:waypoint x="590.0" y="255.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow20" id="BPMNEdge_flow20">
+        <omgdi:waypoint x="610.0" y="275.0"></omgdi:waypoint>
+        <omgdi:waypoint x="610.0" y="300.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow21" id="BPMNEdge_flow21">
+        <omgdi:waypoint x="610.0" y="235.0"></omgdi:waypoint>
+        <omgdi:waypoint x="609.0" y="43.0"></omgdi:waypoint>
+        <omgdi:waypoint x="281.0" y="43.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</definitions>

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="Copy my workflows" basedir="." default="Copy-all-workflows">
+    <property file="build.properties" />
+    <target name="Copy-all-workflows" description="Copy all workflow">
+        <echo>Copy config</echo>
+        <copy todir="${shared.dir}" verbose="true">
+            <fileset dir="${project.dir}/config" />
+        </copy>
+        <echo>Copy diagram</echo>
+        <copy todir="${extension.dir}" verbose="true">
+            <fileset dir="${project.dir}/src/main/resources/diagrams" />
+            <globmapper from="*.bpmn" to="*.bpmn20.xml" />
+        </copy>
+    </target>
+</project>
