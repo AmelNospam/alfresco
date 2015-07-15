@@ -1,0 +1,436 @@
+ <alfresco-config>
+    
+   <!-- Repository Library config section -->
+      <!--
+    <config evaluator="string-compare" condition="RepositoryLibrary" replace="true">
+        <visible>true</visible>
+    </config>
+    <config evaluator="string-compare" condition="Remote">
+        <remote>
+            <endpoint>
+                <id>alfresco-noauth</id>
+                <name>Alfresco - unauthenticated access</name>
+                <description>Access to Alfresco Repository WebScripts that do not require authentication</description>
+                <connector-id>alfresco</connector-id>
+                <endpoint-url>http://localhost:8080/alfresco/s</endpoint-url>
+                <identity>none</identity>
+            </endpoint>
+            <endpoint>
+                <id>alfresco</id>
+                <name>Alfresco - user access</name>
+                <description>Access to Alfresco Repository WebScripts that require user authentication</description>
+                <connector-id>alfresco</connector-id>
+                <endpoint-url>http://localhost:8080/alfresco/s</endpoint-url>
+                <identity>user</identity>
+            </endpoint>
+            <endpoint>
+                <id>alfresco-feed</id>
+                <name>Alfresco Feed</name>
+                <description>Alfresco Feed - supports basic HTTP authentication via the EndPointProxyServlet</description>
+                <connector-id>http</connector-id>
+                <endpoint-url>http://localhost:8080/alfresco/s</endpoint-url>
+                <basic-auth>true</basic-auth>
+                <identity>user</identity>
+            </endpoint>
+            <endpoint>
+                <id>activiti-admin</id>
+                <name>Activiti Admin UI - user access</name>
+                <description>Access to Activiti Admin UI, that requires user authentication</description>
+                <connector-id>activiti-admin-connector</connector-id>
+                <endpoint-url>http://localhost:8080/alfresco/activiti-admin</endpoint-url>
+                <identity>user</identity>
+            </endpoint>
+        </remote>
+    </config>
+      -->
+    <!-- Настройки форм для маршрута dogovora -->
+       <config evaluator="string-compare" condition="activiti$dogovora">
+        <forms>
+            <form>
+                <field-visibility>
+                    <show id="bpm:workflowDescription" />
+                    <show id="packageItems" />
+                    <show id="bpm:assignee" />
+                    <show id="bpm:sendEMailNotifications" />
+                </field-visibility>
+                <appearance>
+                    <set id="" appearance="title" label-id="workflow.set.general" />
+                    <set id="assignee" appearance="title" label-id="workflow.set.assignee" />
+                    <set id="items" appearance="title" label-id="workflow.set.items" />
+                    <set id="other" appearance="title" label-id="workflow.set.other" />
+                    <field id="bpm:workflowDescription" labelid="workflow.field.message" mandatory="true">
+                        <control template="/org/alfresco/components/form/controls/textarea.ftl">
+                            <control-param name="style">width: 95%</control-param>
+                        </control>
+                    </field>
+                    <field id="bpm:sendEMailNotifications">
+                        <control template="/org/alfresco/components/form/controls/workflow/email-notification.ftl" />
+                    </field>
+                    <field id="bpm:assignee" label-id="workflow.field.assign_to" set="assignee" />
+                    <field id="packageItems" set="items" />
+                </appearance>
+            </form>
+        </forms>
+    </config>
+    <config evaluator="task-type" condition="mwf:dogovoraStartTask">
+        <forms>
+            <form>
+                <field-visibility>
+                    <show id="message" />
+                    <show id="bpm:assignee" />
+                    <show id="packageItems" />
+                </field-visibility>
+                <appearance>
+                    <set id="" appearance="title" label-id="workflow.set.general" />
+                    <set id="assignee" appearance="title" label-id="workflow.set.assignee" />
+                    <set id="items" appearance="title" label-id="workflow.set.items" />
+                    <field id="message" labelid="workflow.field.message" read-only="true">
+                        <control template="/org/alfresco/components/form/controls/textarea.ftl">
+                            <control-param name="style">width: 95%</control-param>
+                        </control>
+                    </field>
+                    <field id="bpm:assignee" label-id="workflow.field.assign_to" set="assignee" />
+                    <field id="packageItems" set="items" />
+                </appearance>
+            </form>
+        </forms>
+    </config>
+    <config evaluator="task-type" condition="mwf:dogovoraContractTask">
+        <forms>
+            <form>
+                <field-visibility>
+                    <show id="message" />
+                    <show id="mwf:boss" />
+                    <show id="packageItems" />
+                    <show id="transitions" />
+                </field-visibility>
+                <appearance>
+                    <set id="" appearance="title" label-id="workflow.set.general" />
+                    <set id="assignee" appearance="title" label-id="workflow.set.assignee" />
+                    <set id="items" appearance="title" label-id="workflow.set.items" />
+                    <field id="message" labelid="workflow.field.message" read-only="true">
+                        <control template="/org/alfresco/components/form/controls/textarea.ftl">
+                            <control-param name="style">width: 95%</control-param>
+                        </control>
+                    </field>
+                    <field id="mwf:boss" label-id="mwf_boss" set="assignee" />
+                    <field id="packageItems" set="items" />
+                    <field id="transitions" set="response" />
+                </appearance>
+            </form>
+        </forms>
+    </config>
+    <config evaluator="task-type" condition="mwf:dogovoraBossTask">
+        <forms>
+            <form>
+                <field-visibility>
+                    <show id="message" />
+                    <show id="packageItems" />
+                    <show id="mwf:head" />
+                    <show id="mwf:lastCommentCreator" />
+                    <show id="mwf:lastCommentTaskType" />
+                    <show id="mwf:lastCommentText" />
+                    <show id="bpm:comment" />
+                    <show id="mwf:dogovoraOutcome" />
+                </field-visibility>
+                <appearance>
+                    <set id="" appearance="title" label-id="workflow.set.general" />
+                    <set id="assignee" appearance="title" label-id="workflow.set.assignee" />
+                    <set id="last-comment" appearance="title" label-id="mwf.set.last-comment" />
+                    <set id="items" appearance="title" label-id="workflow.set.items" />
+                    <set id="response" appearance="title" label-id="mwf.set.action" />
+                    <field id="message" labelid="workflow.field.message" read-only="true">
+                        <control template="/org/alfresco/components/form/controls/textarea.ftl">
+                            <control-param name="style">width: 95%</control-param>
+                        </control>
+                    </field>
+                    <field id="mwf:head" label-id="mwf_head" set="assignee" />
+                    <field id="mwf:lastCommentCreator" set="last-comment" label-id="mwf.lable.lastCommentCreator">
+                        <control template="/org/alfresco/components/form/controls/info.ftl" />
+                    </field>
+                    <field id="mwf:lastCommentTaskType" set="last-comment" label-id="mwf.lable.lastCommentTaskType">
+                        <control template="/org/alfresco/components/form/controls/info.ftl" />
+                    </field>
+                    <field id="mwf:lastCommentText" set="last-comment" label-id="mwf.lable.lastCommentText">
+                        <control template="/org/alfresco/components/form/controls/info.ftl" />
+                    </field>
+                    <field id="packageItems" set="items" />
+                    <field id="bpm:comment" label-id="workflow.field.comment" set="response" mandatory="true">
+                        <control template="/org/alfresco/components/form/controls/textarea.ftl">
+                            <control-param name="style">width: 50%</control-param>
+                        </control>
+                    </field>
+                    <field id="mwf:dogovoraOutcome" label-id="workflow.field.outcome" set="response">
+                        <control template="/org/alfresco/components/form/controls/workflow/activiti-transitions.ftl" />
+                    </field>
+                </appearance>
+            </form>
+        </forms>
+    </config>
+    <config evaluator="task-type" condition="mwf:dogovoraHeadTask">
+        <forms>
+            <form>
+                <field-visibility>
+                    <show id="message" />
+                    <show id="packageItems" />
+                    <show id="bpm:assignee" />
+                    <show id="mwf:lastCommentCreator" />
+                    <show id="mwf:lastCommentTaskType" />
+                    <show id="mwf:lastCommentText" />
+                    <show id="bpm:comment" />
+                    <show id="mwf:dogovoraOutcome" />
+                </field-visibility>
+                <appearance>
+                    <set id="" appearance="title" label-id="workflow.set.general" />
+                    <set id="assignee" appearance="title" label-id="workflow.set.assignee" />
+                    <set id="last-comment" appearance="title" label-id="mwf.set.last-comment" />
+                    <set id="items" appearance="title" label-id="workflow.set.items" />
+                    <set id="response" appearance="title" label-id="mwf.set.action" />
+                    <field id="message" labelid="workflow.field.message" read-only="true">
+                        <control template="/org/alfresco/components/form/controls/textarea.ftl">
+                            <control-param name="style">width: 95%</control-param>
+                        </control>
+                    </field>
+                    <field id="bpm:assignee" set="assignee" read-only="true" />
+                    <field id="mwf:lastCommentCreator" set="last-comment" label-id="mwf.lable.lastCommentCreator">
+                        <control template="/org/alfresco/components/form/controls/info.ftl" />
+                    </field>
+                    <field id="mwf:lastCommentTaskType" set="last-comment" label-id="mwf.lable.lastCommentTaskType">
+                        <control template="/org/alfresco/components/form/controls/info.ftl" />
+                    </field>
+                    <field id="mwf:lastCommentText" set="last-comment" label-id="mwf.lable.lastCommentText">
+                        <control template="/org/alfresco/components/form/controls/info.ftl" />
+                    </field>
+                    <field id="packageItems" set="items" />
+                    <field id="bpm:comment" label-id="workflow.field.comment" set="response" mandatory="true">
+                        <control template="/org/alfresco/components/form/controls/textarea.ftl">
+                            <control-param name="style">width: 50%</control-param>
+                        </control>
+                    </field>
+                    <field id="mwf:dogovoraOutcome" label-id="workflow.field.outcome" set="response">
+                        <control template="/org/alfresco/components/form/controls/workflow/activiti-transitions.ftl" />
+                    </field>
+                </appearance>
+            </form>
+        </forms>
+    </config>
+    <config evaluator="task-type" condition="mwf:dogovoraUOTask">
+        <forms>
+            <form>
+                <field-visibility>
+                    <show id="message" />
+                    <show id="packageItems" />
+                    <show id="bpm:assignee" />
+                    <show id="mwf:lastCommentCreator" />
+                    <show id="mwf:lastCommentTaskType" />
+                    <show id="mwf:lastCommentText" />
+                    <show id="bpm:comment" />
+                    <show id="mwf:dogovoraOutcome" />
+                </field-visibility>
+                <appearance>
+                    <set id="" appearance="title" label-id="workflow.set.general" />
+                    <set id="assignee" appearance="title" label-id="workflow.set.assignee" />
+                    <set id="last-comment" appearance="title" label-id="mwf.set.last-comment" />
+                    <set id="items" appearance="title" label-id="workflow.set.items" />
+                    <set id="response" appearance="title" label-id="mwf.set.action" />
+                    <field id="message" labelid="workflow.field.message" read-only="true">
+                        <control template="/org/alfresco/components/form/controls/textarea.ftl">
+                            <control-param name="style">width: 95%</control-param>
+                        </control>
+                    </field>
+                    <field id="bpm:assignee" set="assignee" read-only="true" />
+                    <field id="mwf:lastCommentCreator" set="last-comment" label-id="mwf.lable.lastCommentCreator">
+                        <control template="/org/alfresco/components/form/controls/info.ftl" />
+                    </field>
+                    <field id="mwf:lastCommentTaskType" set="last-comment" label-id="mwf.lable.lastCommentTaskType">
+                        <control template="/org/alfresco/components/form/controls/info.ftl" />
+                    </field>
+                    <field id="mwf:lastCommentText" set="last-comment" label-id="mwf.lable.lastCommentText">
+                        <control template="/org/alfresco/components/form/controls/info.ftl" />
+                    </field>
+                    <field id="packageItems" set="items" />
+                    <field id="bpm:comment" label-id="workflow.field.comment" set="response" mandatory="true">
+                        <control template="/org/alfresco/components/form/controls/textarea.ftl">
+                            <control-param name="style">width: 50%</control-param>
+                        </control>
+                    </field>
+                    <field id="mwf:dogovoraOutcome" label-id="workflow.field.outcome" set="response">
+                        <control template="/org/alfresco/components/form/controls/workflow/activiti-transitions.ftl" />
+                    </field>
+                </appearance>
+            </form>
+        </forms>
+    </config>
+    <config evaluator="task-type" condition="mwf:dogovoraBuhTask">
+        <forms>
+            <form>
+                <field-visibility>
+                    <show id="message" />
+                    <show id="packageItems" />
+                    <show id="bpm:assignee" />
+                    <show id="mwf:lastCommentCreator" />
+                    <show id="mwf:lastCommentTaskType" />
+                    <show id="mwf:lastCommentText" />
+                    <show id="bpm:comment" />
+                    <show id="mwf:dogovoraOutcome" />
+                </field-visibility>
+                <appearance>
+                    <set id="" appearance="title" label-id="workflow.set.general" />
+                    <set id="assignee" appearance="title" label-id="workflow.set.assignee" />
+                    <set id="last-comment" appearance="title" label-id="mwf.set.last-comment" />
+                    <set id="items" appearance="title" label-id="workflow.set.items" />
+                    <set id="response" appearance="title" label-id="mwf.set.action" />
+                    <field id="message" labelid="workflow.field.message" read-only="true">
+                        <control template="/org/alfresco/components/form/controls/textarea.ftl">
+                            <control-param name="style">width: 95%</control-param>
+                        </control>
+                    </field>
+                    <field id="bpm:assignee" set="assignee" read-only="true" />
+                    <field id="mwf:lastCommentCreator" set="last-comment" label-id="mwf.lable.lastCommentCreator">
+                        <control template="/org/alfresco/components/form/controls/info.ftl" />
+                    </field>
+                    <field id="mwf:lastCommentTaskType" set="last-comment" label-id="mwf.lable.lastCommentTaskType">
+                        <control template="/org/alfresco/components/form/controls/info.ftl" />
+                    </field>
+                    <field id="mwf:lastCommentText" set="last-comment" label-id="mwf.lable.lastCommentText">
+                        <control template="/org/alfresco/components/form/controls/info.ftl" />
+                    </field>
+                    <field id="packageItems" set="items" />
+                    <field id="bpm:comment" label-id="workflow.field.comment" set="response" mandatory="true">
+                        <control template="/org/alfresco/components/form/controls/textarea.ftl">
+                            <control-param name="style">width: 50%</control-param>
+                        </control>
+                    </field>
+                    <field id="mwf:dogovoraOutcome" label-id="workflow.field.outcome" set="response">
+                        <control template="/org/alfresco/components/form/controls/workflow/activiti-transitions.ftl" />
+                    </field>
+                </appearance>
+            </form>
+        </forms>
+    </config>
+    <config evaluator="task-type" condition="mwf:dogovoraCFOTask">
+        <forms>
+            <form>
+                <field-visibility>
+                    <show id="message" />
+                    <show id="packageItems" />
+                    <show id="bpm:assignee" />
+                    <show id="mwf:lastCommentCreator" />
+                    <show id="mwf:lastCommentTaskType" />
+                    <show id="mwf:lastCommentText" />
+                    <show id="bpm:comment" />
+                    <show id="mwf:dogovoraOutcome" />
+                </field-visibility>
+                <appearance>
+                    <set id="" appearance="title" label-id="workflow.set.general" />
+                    <set id="assignee" appearance="title" label-id="workflow.set.assignee" />
+                    <set id="last-comment" appearance="title" label-id="mwf.set.last-comment" />
+                    <set id="items" appearance="title" label-id="workflow.set.items" />
+                    <set id="response" appearance="title" label-id="mwf.set.action" />
+                    <field id="message" labelid="workflow.field.message" read-only="true">
+                        <control template="/org/alfresco/components/form/controls/textarea.ftl">
+                            <control-param name="style">width: 95%</control-param>
+                        </control>
+                    </field>
+                    <field id="bpm:assignee" set="assignee" read-only="true" />
+                    <field id="mwf:lastCommentCreator" set="last-comment" label-id="mwf.lable.lastCommentCreator">
+                        <control template="/org/alfresco/components/form/controls/info.ftl" />
+                    </field>
+                    <field id="mwf:lastCommentTaskType" set="last-comment" label-id="mwf.lable.lastCommentTaskType">
+                        <control template="/org/alfresco/components/form/controls/info.ftl" />
+                    </field>
+                    <field id="mwf:lastCommentText" set="last-comment" label-id="mwf.lable.lastCommentText">
+                        <control template="/org/alfresco/components/form/controls/info.ftl" />
+                    </field>
+                    <field id="packageItems" set="items" />
+                    <field id="bpm:comment" label-id="workflow.field.comment" set="response" mandatory="true">
+                        <control template="/org/alfresco/components/form/controls/textarea.ftl">
+                            <control-param name="style">width: 50%</control-param>
+                        </control>
+                    </field>
+                    <field id="mwf:dogovoraOutcome" label-id="workflow.field.outcome" set="response">
+                        <control template="/org/alfresco/components/form/controls/workflow/activiti-transitions.ftl" />
+                    </field>
+                </appearance>
+            </form>
+        </forms>
+    </config>
+    <config evaluator="task-type" condition="mwf:dogovoraCOTask">
+        <forms>
+            <form>
+                <field-visibility>
+                    <show id="message" />
+                    <show id="packageItems" />
+                    <show id="bpm:assignee" />
+                    <show id="mwf:lastCommentCreator" />
+                    <show id="mwf:lastCommentTaskType" />
+                    <show id="mwf:lastCommentText" />
+                    <show id="bpm:comment" />
+                    <show id="mwf:dogovoraOutcome" />
+                </field-visibility>
+                <appearance>
+                    <set id="" appearance="title" label-id="workflow.set.general" />
+                    <set id="assignee" appearance="title" label-id="workflow.set.assignee" />
+                    <set id="last-comment" appearance="title" label-id="mwf.set.last-comment" />
+                    <set id="items" appearance="title" label-id="workflow.set.items" />
+                    <set id="response" appearance="title" label-id="mwf.set.action" />
+                    <field id="message" labelid="workflow.field.message" read-only="true">
+                        <control template="/org/alfresco/components/form/controls/textarea.ftl">
+                            <control-param name="style">width: 95%</control-param>
+                        </control>
+                    </field>
+                    <field id="bpm:assignee" set="assignee" read-only="true" />
+                    <field id="mwf:lastCommentCreator" set="last-comment" label-id="mwf.lable.lastCommentCreator">
+                        <control template="/org/alfresco/components/form/controls/info.ftl" />
+                    </field>
+                    <field id="mwf:lastCommentTaskType" set="last-comment" label-id="mwf.lable.lastCommentTaskType">
+                        <control template="/org/alfresco/components/form/controls/info.ftl" />
+                    </field>
+                    <field id="mwf:lastCommentText" set="last-comment" label-id="mwf.lable.lastCommentText">
+                        <control template="/org/alfresco/components/form/controls/info.ftl" />
+                    </field>
+                    <field id="packageItems" set="items" />
+                    <field id="bpm:comment" label-id="workflow.field.comment" set="response" mandatory="true">
+                        <control template="/org/alfresco/components/form/controls/textarea.ftl">
+                            <control-param name="style">width: 50%</control-param>
+                        </control>
+                    </field>
+                    <field id="mwf:dogovoraOutcome" label-id="workflow.field.outcome" set="response">
+                        <control template="/org/alfresco/components/form/controls/workflow/activiti-transitions.ftl" />
+                    </field>
+                </appearance>
+            </form>
+        </forms>
+    </config>
+    <config evaluator="task-type" condition="mwf:dogovoraEndTask">
+        <forms>
+            <form>
+                <field-visibility>
+                    <show id="message" />
+                    <show id="packageItems" />
+                    <show id="bpm:comment" />
+                    <show id="transitions" />
+                </field-visibility>
+                <appearance>
+                    <set id="" appearance="title" label-id="workflow.set.general" />
+                    <set id="items" appearance="title" label-id="workflow.set.items" />
+                    <set id="response" appearance="title" label-id="mwf.set.action" />
+                    <field id="message" labelid="workflow.field.message">
+                        <control template="/org/alfresco/components/form/controls/textarea.ftl">
+                            <control-param name="style">width: 95%</control-param>
+                        </control>
+                    </field>
+                    <field id="packageItems" set="items" />
+                    <field id="bpm:comment" label-id="workflow.field.comment" set="response">
+                        <control template="/org/alfresco/components/form/controls/textarea.ftl">
+                            <control-param name="style">width: 50%</control-param>
+                        </control>
+                    </field>
+                    <field id="transitions" set="response" />
+                </appearance>
+            </form>
+        </forms>
+    </config>
+   <!-- -->
+ 
+</alfresco-config>

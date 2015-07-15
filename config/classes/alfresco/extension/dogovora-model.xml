@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model name="mwf:dogovora" xmlns="http://www.alfresco.org/model/dictionary/1.0">
+    <imports>
+        <import uri="http://www.alfresco.org/model/dictionary/1.0" prefix="d" />
+        <import uri="http://www.alfresco.org/model/system/1.0" prefix="sys" />
+        <import uri="http://www.alfresco.org/model/content/1.0" prefix="cm" />
+        <import uri="http://www.alfresco.org/model/user/1.0" prefix="usr" />
+        <import uri="http://www.alfresco.org/model/bpm/1.0" prefix="bpm" />
+        <import uri="http://www.alfresco.org/model/workflow/1.0" prefix="wf" />
+    </imports>
+    <namespaces>
+        <namespace uri="http://ecm-alfresco.ru/model/workflow/1.0" prefix="mwf" />
+    </namespaces>
+    <types>
+        <!-- dogovora -->
+        <type name="mwf:dogovoraStartTask">
+            <parent>bpm:startTask</parent>
+            <overrides>
+                <property name="bpm:packageActionGroup">
+                    <default>add_package_item_actions</default>
+                </property>
+            </overrides>
+            <mandatory-aspects>
+                <aspect>bpm:assignee</aspect>
+                <aspect>mwf:lastComment</aspect>
+            </mandatory-aspects>
+        </type>
+        <type name="mwf:dogovoraTask">
+            <parent>bpm:activitiOutcomeTask</parent>
+            <properties>
+                <property name="mwf:dogovoraOutcome">
+                    <type>d:text</type>
+                    <default>Reject</default>
+                    <constraints>
+                        <constraint name="mwf:outcomeOptions" type="LIST">
+                            <parameter name="allowedValues">
+                                <list>
+                                    <value>Approve</value>
+                                    <value>Reject</value>
+                                </list>
+                            </parameter>
+                        </constraint>
+                    </constraints>
+                </property>
+            </properties>
+            <overrides>
+                <property name="bpm:packageActionGroup">
+                    <default>edit_package_item_actions</default>
+                </property>
+                <property name="bpm:outcomePropertyName">
+                    <default>{http://ecm-alfresco.ru/model/workflow/1.0}dogovoraOutcome</default>
+                </property>
+            </overrides>
+            <mandatory-aspects>
+                <aspect>mwf:lastComment</aspect>
+            </mandatory-aspects>
+        </type>
+        <type name="mwf:dogovoraContractTask">
+            <parent>bpm:workflowtask</parent>
+            <overrides>
+                <property name="bpm:packageActionGroup">
+                    <default>add_package_item_actions</default>
+                </property>
+                <property name="bpm:packageItemActionGroup">
+                    <default>edit_package_item_actions</default>
+                </property>
+            </overrides>
+            <mandatory-aspects>
+                <aspect>mwf:boss</aspect>
+                <aspect>mwf:lastComment</aspect>
+            </mandatory-aspects>
+        </type>
+        <type name="mwf:dogovoraBossTask">
+            <parent>mwf:dogovoraTask</parent>
+            <overrides>
+                <property name="bpm:packageItemActionGroup">
+                    <default>edit_package_item_actions</default>
+                </property>
+            </overrides>
+            <mandatory-aspects>
+                <aspect>mwf:head</aspect>
+                <aspect>mwf:lastComment</aspect>
+            </mandatory-aspects>
+        </type>
+        <type name="mwf:dogovoraHeadTask">
+            <parent>mwf:dogovoraTask</parent>
+            <overrides>
+                <property name="bpm:packageItemActionGroup">
+                    <default>edit_package_item_actions</default>
+                </property>
+            </overrides>
+            <mandatory-aspects>
+                <aspect>mwf:lastComment</aspect>
+            </mandatory-aspects>
+        </type>
+        <type name="mwf:dogovoraUOTask">
+            <parent>mwf:dogovoraTask</parent>
+            <overrides>
+                <property name="bpm:packageActionGroup">
+                    <default>edit_package_item_actions</default>
+                </property>
+            </overrides>
+        </type>
+        <type name="mwf:dogovoraCFOTask">
+            <parent>mwf:dogovoraTask</parent>
+        </type>
+        <type name="mwf:dogovoraCOTask">
+            <parent>mwf:dogovoraTask</parent>
+        </type>
+        <type name="mwf:dogovoraEndTask">
+            <parent>bpm:workflowTask</parent>
+            <overrides>
+                <property name="bpm:packageItemActionGroup">
+                    <default>edit_package_item_actions</default>
+                </property>
+            </overrides>
+            <mandatory-aspects>
+                <aspect>bpm:assignee</aspect>
+            </mandatory-aspects>
+        </type>
+    </types>
+    <aspects>
+        <aspect name="mwf:lastComment">
+            <properties>
+                <property name="mwf:lastCommentText">
+                    <type>d:text</type>
+                    <mandatory>false</mandatory>
+                </property>
+                <property name="mwf:lastCommentTaskType">
+                    <type>d:text</type>
+                    <mandatory>false</mandatory>
+                </property>
+                <property name="mwf:lastCommentCreator">
+                    <type>d:text</type>
+                    <mandatory>false</mandatory>
+                </property>
+            </properties>
+        </aspect>
+       	<aspect name="mwf:boss">
+			<associations>
+				<association name="mwf:boss">
+					<source>
+						<mandatory>true</mandatory>
+						<many>false</many>
+					</source>
+					<target>
+						<class>cm:person</class>
+						<mandatory>true</mandatory>
+						<many>false</many>
+					</target>
+				</association>
+			</associations>
+		</aspect>
+       	<aspect name="mwf:head">
+			<associations>
+				<association name="mwf:head">
+					<source>
+						<mandatory>true</mandatory>
+						<many>false</many>
+					</source>
+					<target>
+						<class>cm:person</class>
+						<mandatory>true</mandatory>
+						<many>false</many>
+					</target>
+				</association>
+			</associations>
+		</aspect>
+    </aspects>
+</model>
