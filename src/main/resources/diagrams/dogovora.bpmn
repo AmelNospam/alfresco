@@ -4,8 +4,7 @@
     <extensionElements>
       <activiti:executionListener event="start" class="org.alfresco.repo.workflow.activiti.listener.ScriptExecutionListener">
         <activiti:field name="script">
-          <activiti:string><![CDATA[
-            execution.setVariable('mwf_COGroup', groups.getGroup('CO').getFullName());
+          <activiti:string><![CDATA[execution.setVariable('mwf_COGroup', groups.getGroup('CO').getFullName());
             execution.setVariable('mwf_CFOGroup', groups.getGroup('CFO').getFullName());
             execution.setVariable('mwf_BuhGroup', groups.getGroup('Buh').getFullName());
             execution.setVariable('mwf_lawGroup', groups.getGroup('law').getFullName());]]></activiti:string>
@@ -23,18 +22,41 @@
         </activiti:taskListener>
         <activiti:taskListener event="complete" class="org.alfresco.repo.workflow.activiti.tasklistener.ScriptTaskListener">
           <activiti:field name="script">
-            <activiti:string><![CDATA[execution.setVariable('mwf_dogovoraOutcome', task.getVariable('mwf_dogovoraOutcome'));
+            <activiti:string><![CDATA[
+              var boss = task.getVariable('mwf_boss');
+			  execution.setVariable('mwf_boss', boss.properties.userName);
+			  execution.setVariable('mwf_dogovoraOutcome', task.getVariable('mwf_dogovoraOutcome'));
               execution.setVariable('mwf_lastCommentText', task.getVariable('bpm_comment'));
               execution.setVariable('mwf_lastCommentCreator', person.properties['cm:firstName']+ ' ' +person.properties['cm:lastName']);    
-              execution.setVariable('mwf_lastCommentTaskType', 'Подготовка текста договора');
-              var boss = task.getVariable('mwf_boss');
-			  execution.setVariable('boss', boss.properties.userName);]]>
-            </activiti:string>
+              execution.setVariable('mwf_lastCommentTaskType', 'Подготовка текста договора');]]></activiti:string>
           </activiti:field>
         </activiti:taskListener>
       </extensionElements>
     </userTask>
-    <userTask id="dogovoraHeadTask" name="Согласование с директором направления" activiti:assignee="${bpm_assignee.properties.userName}" activiti:formKey="mwf:dogovoraHeadTask">
+    <userTask id="dogovoraBossTask" name="Согласование с руководителем" activiti:assignee="${mwf_boss}" activiti:formKey="mwf:dogovoraBossTask">
+      <extensionElements>
+        <activiti:taskListener event="create" class="org.alfresco.repo.workflow.activiti.tasklistener.ScriptTaskListener">
+          <activiti:field name="script">
+            <activiti:string><![CDATA[if (typeof bpm_workflowDueDate != 'undefined') task.setVariable('bpm_dueDate', bpm_workflowDueDate);
+              if (typeof bpm_workflowPriority != 'undefined') task.priority = bpm_workflowPriority;]]></activiti:string>
+          </activiti:field>
+        </activiti:taskListener>
+        <activiti:taskListener event="complete" class="org.alfresco.repo.workflow.activiti.tasklistener.ScriptTaskListener">
+          <activiti:field name="script">
+            <activiti:string><![CDATA[
+            var head = task.getVariable('mwf_head');
+		 	execution.setVariable('mwf_head', head.properties.userName);
+            execution.setVariable('mwf_dogovoraOutcome', task.getVariable('mwf_dogovoraOutcome'));
+            if(task.getVariable('mwf_dogovoraOutcome')=='Reject'){
+                execution.setVariable('mwf_lastCommentText', task.getVariable('bpm_comment'));
+                execution.setVariable('mwf_lastCommentCreator', person.properties['cm:firstName']+ ' ' +person.properties['cm:lastName']);    
+                execution.setVariable('mwf_lastCommentTaskType', "Согласование с руководителем");    
+              }]]></activiti:string>
+          </activiti:field>
+        </activiti:taskListener>
+      </extensionElements>
+    </userTask>
+    <userTask id="dogovoraHeadTask" name="Согласование с директором направления" activiti:assignee="${mwf_head}" activiti:formKey="mwf:dogovoraHeadTask">
       <extensionElements>
         <activiti:taskListener event="create" class="org.alfresco.repo.workflow.activiti.tasklistener.ScriptTaskListener">
           <activiti:field name="script">
@@ -94,51 +116,6 @@
         </activiti:taskListener>
       </extensionElements>
     </userTask>
-    <userTask id="dogovoraEndTask" name="Договор согласован" activiti:assignee="${bpm_assignee.properties.userName}" activiti:formKey="mwf:dogovoraEndTask">
-      <extensionElements>
-        <activiti:taskListener event="create" class="org.alfresco.repo.workflow.activiti.tasklistener.ScriptTaskListener">
-          <activiti:field name="script">
-            <activiti:string><![CDATA[if (typeof bpm_workflowDueDate != 'undefined') task.setVariable('bpm_dueDate', bpm_workflowDueDate);
-              if (typeof bpm_workflowPriority != 'undefined') task.priority = bpm_workflowPriority;]]></activiti:string>
-          </activiti:field>
-        </activiti:taskListener>
-      </extensionElements>
-    </userTask>
-    <endEvent id="dogovoraEndEvent" name="End"></endEvent>
-    <sequenceFlow id="flow1" sourceRef="dogovoraStartTask" targetRef="dogovoraContractTask"></sequenceFlow>
-    <exclusiveGateway id="exclusivegateway6" name="Exclusive Gateway"></exclusiveGateway>
-    <sequenceFlow id="flow30" sourceRef="dogovoraBossTask" targetRef="exclusivegateway6"></sequenceFlow>
-    <sequenceFlow id="flow31" sourceRef="exclusivegateway6" targetRef="dogovoraContractTask">
-          <conditionExpression xsi:type="tFormalExpression"><![CDATA[${mwf_dogovoraOutcome == 'Reject'}]]></conditionExpression>
-    </sequenceFlow>
-    <sequenceFlow id="flow2" sourceRef="exclusivegateway6" targetRef="dogovoraHeadTask">
-      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${mwf_dogovoraOutcome == 'Approve'}]]></conditionExpression>
-    </sequenceFlow>
-    <sequenceFlow id="flow12" sourceRef="dogovoraEndTask" targetRef="dogovoraEndEvent"></sequenceFlow>
-    <exclusiveGateway id="exclusivegateway1" name="Exclusive Gateway"></exclusiveGateway>
-    <exclusiveGateway id="exclusivegateway2" name="Exclusive Gateway"></exclusiveGateway>
-    <exclusiveGateway id="exclusivegateway3" name="Exclusive Gateway"></exclusiveGateway>
-    <sequenceFlow id="flow13" sourceRef="dogovoraHeadTask" targetRef="exclusivegateway1"></sequenceFlow>
-    <sequenceFlow id="flow14" sourceRef="exclusivegateway1" targetRef="dogovoraUOTask">
-      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${mwf_dogovoraOutcome == 'Approve'}]]></conditionExpression>
-    </sequenceFlow>
-    <sequenceFlow id="flow15" sourceRef="exclusivegateway1" targetRef="dogovoraContractTask">
-      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${mwf_dogovoraOutcome == 'Reject'}]]></conditionExpression>
-    </sequenceFlow>
-    <sequenceFlow id="flow16" sourceRef="dogovoraUOTask" targetRef="exclusivegateway3"></sequenceFlow>
-    <sequenceFlow id="flow17" sourceRef="exclusivegateway3" targetRef="dogovoraBuhTask">
-      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${mwf_dogovoraOutcome == 'Approve'}]]></conditionExpression>
-    </sequenceFlow>
-    <sequenceFlow id="flow18" sourceRef="exclusivegateway3" targetRef="dogovoraContractTask">
-      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${mwf_dogovoraOutcome == 'Reject'}]]></conditionExpression>
-    </sequenceFlow>
-    <sequenceFlow id="flow19" sourceRef="dogovoraBuhTask" targetRef="exclusivegateway2"></sequenceFlow>
-    <sequenceFlow id="flow20" sourceRef="exclusivegateway2" targetRef="dogovoraCFOTask">
-      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${mwf_dogovoraOutcome == 'Approve'}]]></conditionExpression>
-    </sequenceFlow>
-    <sequenceFlow id="flow21" sourceRef="exclusivegateway2" targetRef="dogovoraContractTask">
-      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${mwf_dogovoraOutcome == 'Reject'}]]></conditionExpression>
-    </sequenceFlow>
     <userTask id="dogovoraCFOTask" name="Согласование с фин. директором" activiti:candidateGroups="${mwf_CFOGroup}" activiti:formKey="mwf:dogovoraCFOTask">
       <extensionElements>
         <activiti:taskListener event="create" class="org.alfresco.repo.workflow.activiti.tasklistener.ScriptTaskListener">
@@ -159,11 +136,6 @@
         </activiti:taskListener>
       </extensionElements>
     </userTask>
-    <exclusiveGateway id="exclusivegateway4" name="Exclusive Gateway"></exclusiveGateway>
-    <sequenceFlow id="flow23" sourceRef="dogovoraCFOTask" targetRef="exclusivegateway4"></sequenceFlow>
-    <sequenceFlow id="flow24" sourceRef="exclusivegateway4" targetRef="dogovoraContractTask">
-          <conditionExpression xsi:type="tFormalExpression"><![CDATA[${mwf_dogovoraOutcome == 'Reject'}]]></conditionExpression>
-          </sequenceFlow>
     <userTask id="dogovoraCOTask" name="Согласование с директором" activiti:candidateGroups="${mwf_COGroup}" activiti:formKey="mwf:dogovoraCOTask">
       <extensionElements>
         <activiti:taskListener event="create" class="org.alfresco.repo.workflow.activiti.tasklistener.ScriptTaskListener">
@@ -184,18 +156,7 @@
         </activiti:taskListener>
       </extensionElements>
     </userTask>
-    <sequenceFlow id="flow25" sourceRef="exclusivegateway4" targetRef="dogovoraCOTask">
-          <conditionExpression xsi:type="tFormalExpression"><![CDATA[${mwf_dogovoraOutcome == 'Approve'}]]></conditionExpression>
-    </sequenceFlow>
-    <exclusiveGateway id="exclusivegateway5" name="Exclusive Gateway"></exclusiveGateway>
-    <sequenceFlow id="flow26" sourceRef="dogovoraCOTask" targetRef="exclusivegateway5"></sequenceFlow>
-    <sequenceFlow id="flow27" sourceRef="exclusivegateway5" targetRef="dogovoraContractTask">
-          <conditionExpression xsi:type="tFormalExpression"><![CDATA[${mwf_dogovoraOutcome == 'Reject'}]]></conditionExpression>
-    </sequenceFlow>
-    <sequenceFlow id="flow28" sourceRef="exclusivegateway5" targetRef="dogovoraEndTask">
-          <conditionExpression xsi:type="tFormalExpression"><![CDATA[${mwf_dogovoraOutcome == 'Approve'}]]></conditionExpression>
-    </sequenceFlow>
-    <userTask id="dogovoraBossTask" name="Согласование с руководителем" activiti:assignee="${boss}" activiti:formKey="mwf:dogovoraBossTask">
+    <userTask id="dogovoraEndTask" name="Договор согласован" activiti:assignee="${bpm_assignee.properties.userName}" activiti:formKey="mwf:dogovoraEndTask">
       <extensionElements>
         <activiti:taskListener event="create" class="org.alfresco.repo.workflow.activiti.tasklistener.ScriptTaskListener">
           <activiti:field name="script">
@@ -203,22 +164,60 @@
               if (typeof bpm_workflowPriority != 'undefined') task.priority = bpm_workflowPriority;]]></activiti:string>
           </activiti:field>
         </activiti:taskListener>
-        <activiti:taskListener event="complete" class="org.alfresco.repo.workflow.activiti.tasklistener.ScriptTaskListener">
-          <activiti:field name="script">
-            <activiti:string><![CDATA[
-              var head = task.getVariable('mwf_head');
-			  execution.setVariable('head', head.properties.userName);
-              execution.setVariable('mwf_dogovoraOutcome', task.getVariable('mwf_dogovoraOutcome'));
-              if(task.getVariable('mwf_dogovoraOutcome')=='Reject'){
-                execution.setVariable('mwf_lastCommentText', task.getVariable('bpm_comment'));
-                execution.setVariable('mwf_lastCommentCreator', person.properties['cm:firstName']+ ' ' +person.properties['cm:lastName']);    
-                execution.setVariable('mwf_lastCommentTaskType', "Согласование с руководителем");    
-              }]]></activiti:string>
-          </activiti:field>
-        </activiti:taskListener>
       </extensionElements>
     </userTask>
+    <endEvent id="dogovoraEndEvent" name="End"></endEvent>
+    <sequenceFlow id="flow1" sourceRef="dogovoraStartTask" targetRef="dogovoraContractTask"></sequenceFlow>
     <sequenceFlow id="flow29" sourceRef="dogovoraContractTask" targetRef="dogovoraBossTask"></sequenceFlow>
+    <sequenceFlow id="flow30" sourceRef="dogovoraBossTask" targetRef="exclusivegateway6"></sequenceFlow>
+    <sequenceFlow id="flow13" sourceRef="dogovoraHeadTask" targetRef="exclusivegateway1"></sequenceFlow>
+    <sequenceFlow id="flow16" sourceRef="dogovoraUOTask" targetRef="exclusivegateway3"></sequenceFlow>
+    <sequenceFlow id="flow19" sourceRef="dogovoraBuhTask" targetRef="exclusivegateway2"></sequenceFlow>
+    <sequenceFlow id="flow23" sourceRef="dogovoraCFOTask" targetRef="exclusivegateway4"></sequenceFlow>
+    <sequenceFlow id="flow26" sourceRef="dogovoraCOTask" targetRef="exclusivegateway5"></sequenceFlow>
+    <sequenceFlow id="flow12" sourceRef="dogovoraEndTask" targetRef="dogovoraEndEvent"></sequenceFlow>
+    <exclusiveGateway id="exclusivegateway6" name="Exclusive Gateway"></exclusiveGateway>
+    <sequenceFlow id="flow31" sourceRef="exclusivegateway6" targetRef="dogovoraContractTask">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${mwf_dogovoraOutcome == 'Reject'}]]></conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="flow2" sourceRef="exclusivegateway6" targetRef="dogovoraHeadTask">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${mwf_dogovoraOutcome == 'Approve'}]]></conditionExpression>
+    </sequenceFlow>
+    <exclusiveGateway id="exclusivegateway1" name="Exclusive Gateway"></exclusiveGateway>
+    <sequenceFlow id="flow14" sourceRef="exclusivegateway1" targetRef="dogovoraUOTask">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${mwf_dogovoraOutcome == 'Approve'}]]></conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="flow15" sourceRef="exclusivegateway1" targetRef="dogovoraContractTask">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${mwf_dogovoraOutcome == 'Reject'}]]></conditionExpression>
+    </sequenceFlow>
+    <exclusiveGateway id="exclusivegateway2" name="Exclusive Gateway"></exclusiveGateway>
+    <sequenceFlow id="flow20" sourceRef="exclusivegateway2" targetRef="dogovoraCFOTask">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${mwf_dogovoraOutcome == 'Approve'}]]></conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="flow21" sourceRef="exclusivegateway2" targetRef="dogovoraContractTask">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${mwf_dogovoraOutcome == 'Reject'}]]></conditionExpression>
+    </sequenceFlow>
+    <exclusiveGateway id="exclusivegateway3" name="Exclusive Gateway"></exclusiveGateway>
+    <sequenceFlow id="flow17" sourceRef="exclusivegateway3" targetRef="dogovoraBuhTask">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${mwf_dogovoraOutcome == 'Approve'}]]></conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="flow18" sourceRef="exclusivegateway3" targetRef="dogovoraContractTask">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${mwf_dogovoraOutcome == 'Reject'}]]></conditionExpression>
+    </sequenceFlow>
+    <exclusiveGateway id="exclusivegateway4" name="Exclusive Gateway"></exclusiveGateway>
+    <sequenceFlow id="flow24" sourceRef="exclusivegateway4" targetRef="dogovoraContractTask">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${mwf_dogovoraOutcome == 'Reject'}]]></conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="flow25" sourceRef="exclusivegateway4" targetRef="dogovoraCOTask">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${mwf_dogovoraOutcome == 'Approve'}]]></conditionExpression>
+    </sequenceFlow>
+    <exclusiveGateway id="exclusivegateway5" name="Exclusive Gateway"></exclusiveGateway>
+    <sequenceFlow id="flow27" sourceRef="exclusivegateway5" targetRef="dogovoraContractTask">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${mwf_dogovoraOutcome == 'Reject'}]]></conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="flow28" sourceRef="exclusivegateway5" targetRef="dogovoraEndTask">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${mwf_dogovoraOutcome == 'Approve'}]]></conditionExpression>
+    </sequenceFlow>
   </process>
   <bpmndi:BPMNDiagram id="BPMNDiagram_dogovora">
     <bpmndi:BPMNPlane bpmnElement="dogovora" id="BPMNPlane_dogovora">
@@ -242,6 +241,9 @@
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape bpmnElement="dogovoraEndEvent" id="BPMNShape_dogovoraEndEvent">
         <omgdc:Bounds height="35.0" width="35.0" x="762.0" y="617.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="exclusivegateway6" id="BPMNShape_exclusivegateway6">
+        <omgdc:Bounds height="40.0" width="40.0" x="200.0" y="117.0"></omgdc:Bounds>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape bpmnElement="exclusivegateway1" id="BPMNShape_exclusivegateway1">
         <omgdc:Bounds height="40.0" width="40.0" x="320.0" y="190.0"></omgdc:Bounds>
@@ -267,12 +269,18 @@
       <bpmndi:BPMNShape bpmnElement="dogovoraBossTask" id="BPMNShape_dogovoraBossTask">
         <omgdc:Bounds height="55.0" width="105.0" x="70.0" y="110.0"></omgdc:Bounds>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape bpmnElement="exclusivegateway6" id="BPMNShape_exclusivegateway6">
-        <omgdc:Bounds height="40.0" width="40.0" x="200.0" y="117.0"></omgdc:Bounds>
-      </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge bpmnElement="flow1" id="BPMNEdge_flow1">
         <omgdi:waypoint x="45.0" y="43.0"></omgdi:waypoint>
         <omgdi:waypoint x="70.0" y="43.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow30" id="BPMNEdge_flow30">
+        <omgdi:waypoint x="175.0" y="137.0"></omgdi:waypoint>
+        <omgdi:waypoint x="200.0" y="137.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow31" id="BPMNEdge_flow31">
+        <omgdi:waypoint x="220.0" y="117.0"></omgdi:waypoint>
+        <omgdi:waypoint x="220.0" y="43.0"></omgdi:waypoint>
+        <omgdi:waypoint x="175.0" y="43.0"></omgdi:waypoint>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge bpmnElement="flow2" id="BPMNEdge_flow2">
         <omgdi:waypoint x="220.0" y="157.0"></omgdi:waypoint>
@@ -350,15 +358,6 @@
       <bpmndi:BPMNEdge bpmnElement="flow29" id="BPMNEdge_flow29">
         <omgdi:waypoint x="122.0" y="71.0"></omgdi:waypoint>
         <omgdi:waypoint x="122.0" y="110.0"></omgdi:waypoint>
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge bpmnElement="flow30" id="BPMNEdge_flow30">
-        <omgdi:waypoint x="175.0" y="137.0"></omgdi:waypoint>
-        <omgdi:waypoint x="200.0" y="137.0"></omgdi:waypoint>
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge bpmnElement="flow31" id="BPMNEdge_flow31">
-        <omgdi:waypoint x="220.0" y="117.0"></omgdi:waypoint>
-        <omgdi:waypoint x="220.0" y="43.0"></omgdi:waypoint>
-        <omgdi:waypoint x="175.0" y="43.0"></omgdi:waypoint>
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>

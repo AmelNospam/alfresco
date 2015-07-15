@@ -106,7 +106,7 @@
                 </field-visibility>
                 <appearance>
                     <set id="" appearance="title" label-id="workflow.set.general" />
-                    <set id="assignee" appearance="title" label-id="workflow.set.assignee" />
+                    <set id="assignee" appearance="title" label-id="mwf_boss" />
                     <set id="items" appearance="title" label-id="workflow.set.items" />
                     <field id="message" labelid="workflow.field.message" read-only="true">
                         <control template="/org/alfresco/components/form/controls/textarea.ftl">
