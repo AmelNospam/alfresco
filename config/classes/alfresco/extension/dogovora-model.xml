@@ -101,11 +101,29 @@
                 </property>
             </overrides>
         </type>
+        <type name="mwf:dogovoraBuhTask">
+            <parent>mwf:dogovoraTask</parent>
+            <overrides>
+                <property name="bpm:packageActionGroup">
+                    <default>edit_package_item_actions</default>
+                </property>
+            </overrides>
+        </type>
         <type name="mwf:dogovoraCFOTask">
             <parent>mwf:dogovoraTask</parent>
+            <overrides>
+                <property name="bpm:packageActionGroup">
+                    <default>edit_package_item_actions</default>
+                </property>
+            </overrides>
         </type>
         <type name="mwf:dogovoraCOTask">
             <parent>mwf:dogovoraTask</parent>
+            <overrides>
+                <property name="bpm:packageActionGroup">
+                    <default>edit_package_item_actions</default>
+                </property>
+            </overrides>
         </type>
         <type name="mwf:dogovoraEndTask">
             <parent>bpm:workflowTask</parent>

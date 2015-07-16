@@ -115,7 +115,7 @@
                         </control>
                     </field>
                     <field id="packageItems" set="items" />
-                    <field id="mwf:boss" label-id="mwf_boss" set="assignee" />
+                    <field id="mwf:boss" label-id="mwf_boss" set="assignee" read-only="false" />
                     <field id="transitions" set="response" />
                 </appearance>
             </form>
@@ -160,7 +160,7 @@
                             <control-param name="style">width: 50%</control-param>
                         </control>
                     </field>
-                    <field id="mwf:head" label-id="mwf_head" set="assignee" />
+                    <field id="mwf:head" label-id="mwf_head" set="assignee" read-only="false" />
                     <field id="mwf:dogovoraOutcome" label-id="workflow.field.outcome" set="response">
                         <control template="/org/alfresco/components/form/controls/workflow/activiti-transitions.ftl" />
                     </field>
@@ -174,7 +174,6 @@
                 <field-visibility>
                     <show id="message" />
                     <show id="packageItems" />
-                    <show id="bpm:assignee" />
                     <show id="mwf:lastCommentCreator" />
                     <show id="mwf:lastCommentTaskType" />
                     <show id="mwf:lastCommentText" />
@@ -207,7 +206,6 @@
                             <control-param name="style">width: 50%</control-param>
                         </control>
                     </field>
-                    <field id="bpm:assignee" set="assignee" read-only="true" />
                     <field id="mwf:dogovoraOutcome" label-id="workflow.field.outcome" set="response">
                         <control template="/org/alfresco/components/form/controls/workflow/activiti-transitions.ftl" />
                     </field>
@@ -221,7 +219,6 @@
                 <field-visibility>
                     <show id="message" />
                     <show id="packageItems" />
-                    <show id="bpm:assignee" />
                     <show id="mwf:lastCommentCreator" />
                     <show id="mwf:lastCommentTaskType" />
                     <show id="mwf:lastCommentText" />
@@ -230,7 +227,6 @@
                 </field-visibility>
                 <appearance>
                     <set id="" appearance="title" label-id="workflow.set.general" />
-                    <set id="assignee" appearance="title" label-id="workflow.set.assignee" />
                     <set id="last-comment" appearance="title" label-id="mwf.set.last-comment" />
                     <set id="items" appearance="title" label-id="workflow.set.items" />
                     <set id="response" appearance="title" label-id="mwf.set.action" />
@@ -239,7 +235,6 @@
                             <control-param name="style">width: 95%</control-param>
                         </control>
                     </field>
-                    <field id="bpm:assignee" set="assignee" read-only="true" />
                     <field id="mwf:lastCommentCreator" set="last-comment" label-id="mwf.lable.lastCommentCreator">
                         <control template="/org/alfresco/components/form/controls/info.ftl" />
                     </field>
@@ -268,7 +263,6 @@
                 <field-visibility>
                     <show id="message" />
                     <show id="packageItems" />
-                    <show id="bpm:assignee" />
                     <show id="mwf:lastCommentCreator" />
                     <show id="mwf:lastCommentTaskType" />
                     <show id="mwf:lastCommentText" />
@@ -286,7 +280,6 @@
                             <control-param name="style">width: 95%</control-param>
                         </control>
                     </field>
-                    <field id="bpm:assignee" set="assignee" read-only="true" />
                     <field id="mwf:lastCommentCreator" set="last-comment" label-id="mwf.lable.lastCommentCreator">
                         <control template="/org/alfresco/components/form/controls/info.ftl" />
                     </field>
@@ -315,7 +308,6 @@
                 <field-visibility>
                     <show id="message" />
                     <show id="packageItems" />
-                    <show id="bpm:assignee" />
                     <show id="mwf:lastCommentCreator" />
                     <show id="mwf:lastCommentTaskType" />
                     <show id="mwf:lastCommentText" />
@@ -324,7 +316,6 @@
                 </field-visibility>
                 <appearance>
                     <set id="" appearance="title" label-id="workflow.set.general" />
-                    <set id="assignee" appearance="title" label-id="workflow.set.assignee" />
                     <set id="last-comment" appearance="title" label-id="mwf.set.last-comment" />
                     <set id="items" appearance="title" label-id="workflow.set.items" />
                     <set id="response" appearance="title" label-id="mwf.set.action" />
@@ -333,7 +324,6 @@
                             <control-param name="style">width: 95%</control-param>
                         </control>
                     </field>
-                    <field id="bpm:assignee" set="assignee" read-only="true" />
                     <field id="mwf:lastCommentCreator" set="last-comment" label-id="mwf.lable.lastCommentCreator">
                         <control template="/org/alfresco/components/form/controls/info.ftl" />
                     </field>
@@ -362,7 +352,6 @@
                 <field-visibility>
                     <show id="message" />
                     <show id="packageItems" />
-                    <show id="bpm:assignee" />
                     <show id="mwf:lastCommentCreator" />
                     <show id="mwf:lastCommentTaskType" />
                     <show id="mwf:lastCommentText" />
@@ -371,7 +360,6 @@
                 </field-visibility>
                 <appearance>
                     <set id="" appearance="title" label-id="workflow.set.general" />
-                    <set id="assignee" appearance="title" label-id="workflow.set.assignee" />
                     <set id="last-comment" appearance="title" label-id="mwf.set.last-comment" />
                     <set id="items" appearance="title" label-id="workflow.set.items" />
                     <set id="response" appearance="title" label-id="mwf.set.action" />
@@ -380,7 +368,6 @@
                             <control-param name="style">width: 95%</control-param>
                         </control>
                     </field>
-                    <field id="bpm:assignee" set="assignee" read-only="true" />
                     <field id="mwf:lastCommentCreator" set="last-comment" label-id="mwf.lable.lastCommentCreator">
                         <control template="/org/alfresco/components/form/controls/info.ftl" />
                     </field>
